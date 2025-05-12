@@ -13,9 +13,10 @@ import (
 )
 
 type srcThreadResults struct {
-	Success    bool
-	ClientRoot string
-	Files      []p4.DepotFile
+	Success      bool
+	ClientStream string
+	ClientRoot   string
+	Files        []p4.DepotFile
 }
 
 func Harmonize(log Logger, cfg config.Config) error {
@@ -125,7 +126,8 @@ func Harmonize(log Logger, cfg config.Config) error {
 	}
 
 	logDst.Info("Creating changelist in destination...")
-	cl, err := p4dst.CreateEmptyChangelist("p4harmonize")
+	clDescription := fmt.Sprintf("p4harmonize %s (%s) to %s", srcRes.ClientStream, cfg.Src.P4Port, cfg.Dst.ClientStream)
+	cl, err := p4dst.CreateEmptyChangelist(clDescription)
 	if err != nil {
 		logDst.Error("Unable to create new changelist: %v", err)
 		return fmt.Errorf("error prepping for changes")
@@ -380,9 +382,10 @@ func srcSyncAndList(logSrc Logger, shSrc *bsh.Bsh, cfg config.Config) srcThreadR
 	}
 
 	return srcThreadResults{
-		Success:    true,
-		ClientRoot: root,
-		Files:      filteredFiles,
+		Success:      true,
+		ClientStream: spec["Stream"],
+		ClientRoot:   root,
+		Files:        filteredFiles,
 	}
 }
 
