@@ -357,10 +357,32 @@ func srcSyncAndList(logSrc Logger, shSrc *bsh.Bsh, cfg config.Config) srcThreadR
 		return srcThreadResults{Success: false}
 	}
 
+	logSrc.Info("Filtering list of files with exclude paths...")
+
+	// filter the resulting file list to exclude some paths.
+	// this can be further optimized by filtering the sync and list commands as well
+	excludeFiles, err := p4src.ListDepotFilesForPaths(cfg.Src.Exclude)
+	if err != nil {
+		logSrc.Error("Failed to list exclude paths from source: %v", err)
+		return srcThreadResults{Success: false}
+	}
+
+	excludeMap := make(map[string]struct{})
+	for _, r := range excludeFiles {
+		excludeMap[r.Path] = struct{}{}
+	}
+
+	var filteredFiles []p4.DepotFile
+	for _, s := range files {
+		if _, found := excludeMap[s.Path]; !found {
+			filteredFiles = append(filteredFiles, s)
+		}
+	}
+
 	return srcThreadResults{
 		Success:    true,
 		ClientRoot: root,
-		Files:      files,
+		Files:      filteredFiles,
 	}
 }
 

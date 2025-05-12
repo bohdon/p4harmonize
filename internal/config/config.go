@@ -10,10 +10,11 @@ import (
 )
 
 type Source struct {
-	P4Port    string `toml:"p4port"`
-	P4User    string `toml:"p4user"`
-	P4Charset string `toml:"p4charset"`
-	P4Client  string `toml:"p4client"`
+	P4Port    string   `toml:"p4port"`
+	P4User    string   `toml:"p4user"`
+	P4Charset string   `toml:"p4charset"`
+	P4Client  string   `toml:"p4client"`
+	Exclude   []string `toml:"exclude_paths"`
 }
 
 type Destination struct {
